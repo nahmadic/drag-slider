@@ -1,84 +1,44 @@
-const slider = document.querySelector('.slider__content');
-const sliderCards = Array.from(document.querySelectorAll('.slider__card'));
+const sliderContainer = document.querySelector('.slider__content');
 const sliderBar = document.querySelector('.slider__scroll-bar');
-const sliderBarTrack = document.querySelector('.slider__scroll');
+const sliderBarContainer = document.querySelector('.slider__scroll');
+const sliderTrackWidth = sliderContainer.scrollWidth; // Overall width including bits we can't see
+const sliderContainerWidth = sliderContainer.clientWidth; // Width of slider content that we can see
+const sliderBarTrackWidth = sliderBarContainer.offsetWidth; // Width of scrollbar container
+const scrollRatio = sliderTrackWidth / sliderBarTrackWidth; // Calculates the ratio to make scrollbar movement equal to slider movement
+const barWidthRatio = sliderTrackWidth / sliderContainerWidth; // Calculates the ratio of how much smaller the scrollbar container is from the slider container
+const barWidth = sliderBarTrackWidth / barWidthRatio; // Calculates required width of scrollbar in relation to the width of content in the slider
 let isDown = false;
-let startX, scrollLeft;
+let barStartX;
+let barCurrentXLeft = 0; // Sets left side of scrollbar position on page load
+let barCurrentXRight = Math.round(0 + barWidth);  // Sets right side of scrollbar position on page load
+let sliderPosition = 0;
 
-slider.addEventListener('mousedown', (e) => {
+// TODO: Set this in a function so it can continue to work when page resizes etc
+sliderBar.style.width = barWidth + 'px'; // Sets bar width on page load
+
+sliderBarContainer.addEventListener('mousedown', (e) => {
   isDown = true;
-  slider.classList.add('active');
-  startX = e.pageX - slider.offsetLeft;
-  scrollLeft = slider.scrollLeft;
+  barStartX = e.clientX - sliderBar.offsetLeft;
+  sliderPosition = sliderContainer.scrollLeft;
 });
 
-slider.addEventListener('mouseleave', () => {
+sliderBarContainer.addEventListener('mouseleave', () => {
   isDown = false;
-  slider.classList.remove('active');
 });
 
-slider.addEventListener('mouseup', () => {
+sliderBarContainer.addEventListener('mouseup', () => {
   isDown = false;
-  slider.classList.remove('active');
 });
 
-slider.addEventListener('mousemove', (e) => {
+sliderBarContainer.addEventListener('mousemove', (e) => {
   if (!isDown) return;
   e.preventDefault();
-  const x = e.pageX - slider.offsetLeft;
-  const walk = (x - startX)*3;
-  slider.scrollLeft = scrollLeft - walk;
-  sliderBar.style.left = (scrollLeft - walk) / scrollRatio + 'px';
-});
-
-// const slideTrackWidth = sliderCards.map(card => card.offsetWidth).reduce((total, width) => total + width);
-const slideTrackWidth = slider.scrollWidth;
-const slideContainerWidth = slider.clientWidth;
-const slideBarTrackWidth = sliderBarTrack.offsetWidth;
-const scrollRatio = slideTrackWidth / slideBarTrackWidth;
-let barWidth;
-
-console.table(slideTrackWidth, slideContainerWidth, slideBarTrackWidth);
-
-function buildSlideBar(trackWidth, railWidth, containerWidth) {
-  const widthRatio = trackWidth / containerWidth;
-  barWidth = railWidth / widthRatio;
-
-  sliderBar.style.width = barWidth + 'px';
-}
-
-buildSlideBar(slideTrackWidth, slideBarTrackWidth, slideContainerWidth);
-
-sliderBar.addEventListener('mousedown', (e) => {
-  isDown = true;
-  // slider.classList.add('active');
-  startX = e.pageX - sliderBar.offsetLeft;
-  scrollLeft = sliderBar.offsetLeft;
-});
-
-sliderBar.addEventListener('mouseleave', () => {
-  isDown = false;
-  // sliderBar.classList.remove('active');
-});
-
-sliderBar.addEventListener('mouseup', () => {
-  isDown = false;
-  // slider.classList.remove('active');
-});
-
-sliderBar.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  e.preventDefault();
-  const x = e.pageX - sliderBar.offsetLeft;
-  const walk = x - startX;
-  slider.scrollLeft = (scrollLeft + walk) * scrollRatio;
-  barStart = sliderBar.offsetLeft;
-  barEnd = sliderBar.offsetLeft + barWidth;
-  console.log({barStart, barEnd});
-  if(barStart >= 0 && barEnd <= slideBarTrackWidth) {
-    sliderBar.style.left = scrollLeft + walk + 'px';
-  } else {
-
-    // sliderBar.style.left == '0px';
+  barCurrentXLeft = e.clientX - barStartX;
+  console.log({barCurrentXLeft, barStartX});
+  barCurrentXRight = Math.round(barCurrentXLeft + barWidth);
+  let walk = barCurrentXLeft - barStartX;
+  if (barCurrentXLeft >= 0 && barCurrentXRight <= sliderBarTrackWidth) {
+    sliderBar.style.left = barStartX + walk + 'px';
+    sliderContainer.scrollLeft = (sliderPosition + walk) * scrollRatio;
   }
 });
