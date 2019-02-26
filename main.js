@@ -16,9 +16,9 @@ let sliderPosition = 0;
 // TODO: Set this in a function so it can continue to work when page resizes etc
 sliderBar.style.width = barWidth + 'px'; // Sets bar width on page load
 
-sliderBarContainer.addEventListener('mousedown', (e) => {
+sliderBar.addEventListener('mousedown', (e) => {
   isDown = true;
-  barStartX = e.clientX - sliderBar.offsetLeft;
+  barStartX = sliderBar.offsetLeft;
   sliderPosition = sliderContainer.scrollLeft;
 });
 
@@ -30,7 +30,7 @@ sliderBarContainer.addEventListener('mouseup', () => {
   isDown = false;
 });
 
-sliderBarContainer.addEventListener('mousemove', (e) => {
+sliderBar.addEventListener('mousemove', (e) => {
   if (!isDown) return;
   e.preventDefault();
   barCurrentXLeft = e.clientX - barStartX;
@@ -38,7 +38,7 @@ sliderBarContainer.addEventListener('mousemove', (e) => {
   barCurrentXRight = Math.round(barCurrentXLeft + barWidth);
   let walk = barCurrentXLeft - barStartX;
   if (barCurrentXLeft >= 0 && barCurrentXRight <= sliderBarTrackWidth) {
-    sliderBar.style.left = barStartX + walk + 'px';
-    sliderContainer.scrollLeft = (sliderPosition + walk) * scrollRatio;
+    sliderBar.style.left = barCurrentXLeft + walk + 'px';
+    // sliderContainer.scrollLeft = sliderPosition * scrollRatio;
   }
 });
